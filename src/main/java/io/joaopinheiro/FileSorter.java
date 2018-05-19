@@ -4,6 +4,7 @@ package io.joaopinheiro;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -13,7 +14,7 @@ import java.util.List;
  */
 public class FileSorter {
 
-    private static final int CHUNK_SIZE = 10000;
+    public static final int CHUNK_SIZE = 10000;
     private static List<ChunkEntry> chunkList = new ArrayList<>();
 
     public static void main(String[] args){
@@ -23,6 +24,9 @@ public class FileSorter {
         }
 
         createSortedChunks(filePath);
+        unifyChunks("sorted_" + filePath);
+
+        System.out.println("Your file is sorted");
     }
 
     /**
@@ -31,18 +35,16 @@ public class FileSorter {
      *
      * @param path The path to the file we want to read
      */
-    private static void createSortedChunks(String path){
+    public static void createSortedChunks(String path){
         int[] chunk;
         int chunkNumber = 0;
         boolean eofFound = false;
 
         String chunkPath;
-        BufferedWriter writer;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
 
             while(!eofFound) {
-
                 //Read file and sort chunk
                 chunk = new int[CHUNK_SIZE];
                 for (int i = 0; i < CHUNK_SIZE; i++) {
@@ -56,17 +58,10 @@ public class FileSorter {
                 }
                 Arrays.sort(chunk);
 
-                //Create new Chunk File and write sorted values
+                //Create new Chunk File and write sorted values to a tmp_file
                 chunkNumber++;
-                chunkPath = path + "_chunk_"+chunkNumber;
-                writer = new BufferedWriter(new FileWriter(chunkPath));
-
-                for(int val: chunk){
-                    writer.write(val);
-                    writer.newLine();
-                }
-                writer.close();
-                chunkList.add(new ChunkEntry(chunkPath));
+                chunkPath = "tmp\\chunk_"+chunkNumber;
+                chunkList.add(new ChunkEntry(chunkPath, chunk));
             }
 
         } catch (FileNotFoundException e) {
@@ -75,10 +70,39 @@ public class FileSorter {
         } catch (IOException e){
             System.out.println("There was an error reading the file. Exiting.");
         } catch (NumberFormatException e){
-            System.out.println("There was an error reading the file:");
-            System.out.println(e.getLocalizedMessage());
-        }finally{
-
+            System.out.println("There was an error reading the file: " + e.getLocalizedMessage());
         }
+    }
+
+    public static void unifyChunks(String destination){
+        //Initialize all chunks
+        for(ChunkEntry entry: chunkList)
+            entry.initialize();
+
+        try(BufferedWriter writer = new BufferedWriter(new FileWriter(destination))){
+
+            while(!chunkList.isEmpty()) {
+                //Sort the list
+                Collections.sort(chunkList);
+
+                //take first entry
+                ChunkEntry entry = chunkList.get(0);
+
+                //write to new file
+                writer.write(Integer.toString(entry.getNextInt()));
+                writer.newLine();
+
+                if(!entry.hasNext()){
+                    //returning false means there is no next value
+                    chunkList.remove(entry);
+                }
+
+            }
+
+        } catch (IOException e){
+            System.out.println("There was an error reading the file. Exiting.");
+        }
+
+
     }
 }

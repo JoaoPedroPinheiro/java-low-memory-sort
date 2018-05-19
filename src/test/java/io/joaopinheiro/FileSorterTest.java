@@ -38,7 +38,7 @@ public class FileSorterTest {
         Arrays.sort(vals);
     }
 
-    @AfterAll
+    //@AfterAll
     public static void finish()throws IOException{
         Files.delete(Paths.get(FILE_PATH));
     }
@@ -46,7 +46,8 @@ public class FileSorterTest {
 
     @Test
     public void createFile(){
-        System.out.println(vals.length);
+        FileSorter.createSortedChunks(FILE_PATH);
+        FileSorter.unifyChunks("sorted_"+FILE_PATH);
     }
 
 
