@@ -18,8 +18,12 @@ public class GenericSorter {
     public static final String TMP_DIRECTORY = "tmp\\";
     public static final String CHUNK_GENERAL_NAME = "sorted_chunk_";
 
+    /*
+     * Heuristic to guess Optimal Chunk Size
+     *
+     * Currently very rudimentary
+     */
     static{
-        //Calculate a reasonable chunk size based on the available memory
         Runtime runtime = Runtime.getRuntime();
         long memory = runtime.totalMemory();
         CHUNK_SIZE = (int) memory/(2*4);
@@ -47,7 +51,7 @@ public class GenericSorter {
      *
      * @param source The {@link Reader} pointing to the source we want to read and sort
      */
-    private static List<ChunkEntry> createSortedChunks(Reader source){
+    public static List<ChunkEntry> createSortedChunks(Reader source){
 
         int chunkNumber = 0;
         boolean consumed = false;
@@ -85,7 +89,7 @@ public class GenericSorter {
         }
     }
 
-    private static void unifyChunks(Writer destination,List<ChunkEntry> chunkList){
+    public static void unifyChunks(Writer destination,List<ChunkEntry> chunkList){
 
         try(BufferedWriter writer = new BufferedWriter(destination)){
 
@@ -112,7 +116,7 @@ public class GenericSorter {
         }
     }
 
-    private static ChunkEntry storeChunk(List<Integer> values, String path){
+    public static ChunkEntry storeChunk(List<Integer> values, String path){
         //Write the values to disk
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
 
@@ -137,9 +141,8 @@ public class GenericSorter {
     /**
      * Cleans up the tmp directory
      */
-    private static void cleanup(){
+    public static void cleanup(){
         Path toBeDeleted = Paths.get(TMP_DIRECTORY);
-
         try {
             Files.walk(toBeDeleted)
                     .sorted(Comparator.reverseOrder())
