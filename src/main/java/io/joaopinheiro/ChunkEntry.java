@@ -1,57 +1,25 @@
 package io.joaopinheiro;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 
 /**
- * Auxiliary class to handle chunks of integers stored in disk. To use, first call {@link ChunkEntry#initialize()}.
- * {@link ChunkEntry#getNextInt()} will return null until {@link ChunkEntry#initialize()} is called.
+ * Auxiliary class to handle chunks of integers stored in disk.
  *
  * Keep calling {@link ChunkEntry#hasNext()} and {@link ChunkEntry#getNextInt()} to get all the values in the chunk.
  *
- * After {@link ChunkEntry#hasNext()} returns {@code false}, call {@link #closeAndDelete()} to close the underlying
- * Resource and delete the representation on disk.
+ * After {@link ChunkEntry#hasNext()} returns {@code false}, call {@link #close()} to close the underlying
+ * Resource
  *
  * @author Joao Pedro Pinheiro
  */
 public class ChunkEntry implements Comparable<ChunkEntry> {
 
     private int nextInt;
-    private final String path;
     private BufferedReader bufferedReader;
 
-
-    public ChunkEntry(String path, int[] values){
-        this.path = path;
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
-
-            for (int val : values) {
-                writer.write(Integer.toString(val));
-                writer.newLine();
-            }
-        } catch (IOException e){
-            System.out.println("There was an error reading the file : " + e.getLocalizedMessage());
-        }
-    }
-
-    /**
-     * Initializes the underlying Resource and makes this ChunkEntry ready to be used.
-     */
-    public void initialize(){
-        if(bufferedReader != null){
-            System.out.println("ChunkEntry is already initialized.");
-            return;
-        }
-
-        try {
-            bufferedReader = new BufferedReader(new FileReader(path));
-            this.hasNext();
-        } catch (FileNotFoundException e){
-            System.out.println("Internal Error : ");
-            System.out.println(e.getLocalizedMessage());
-        }
+    public ChunkEntry(Reader chunkSource){
+        bufferedReader = new BufferedReader(chunkSource);
+        this.hasNext();
     }
 
 
@@ -79,13 +47,11 @@ public class ChunkEntry implements Comparable<ChunkEntry> {
     /**
      * Closed the underlying resource and deletes the file, since it is no longer needed;
      */
-    public void closeAndDelete(){
+    public void close(){
         try {
             bufferedReader.close();
-            Files.delete(Paths.get(path));
         } catch (IOException e) {
-            System.out.println("There was an error closing the file.");
-            System.out.println(e.getLocalizedMessage());
+            System.out.println("There was an error closing the file: " +e.getLocalizedMessage());
         }
     }
 

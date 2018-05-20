@@ -38,7 +38,7 @@ public class FileSorterTest {
         Arrays.sort(vals);
     }
 
-    //@AfterAll
+    @AfterAll
     public static void finish()throws IOException{
         Files.delete(Paths.get(FILE_PATH));
     }
