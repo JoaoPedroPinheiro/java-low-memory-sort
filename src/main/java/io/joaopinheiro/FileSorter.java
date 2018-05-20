@@ -27,7 +27,7 @@ public class FileSorter {
             System.out.println("The File was not found: " + e.getLocalizedMessage());
             System.exit(1);
         } catch (IOException e){
-            System.out.println("There was an error writing to file: " + e.getLocalizedMessage());
+            System.out.println("There was an error: " + e.getLocalizedMessage());
             System.exit(1);
         }
 

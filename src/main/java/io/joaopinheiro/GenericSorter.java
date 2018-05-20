@@ -7,16 +7,23 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * Utility class with method to order an input and write it to the output
+ * Utility class with method to sort an input and write it to the output
  *
  * @author Joao Pedro Pinheiro
  */
 
 public class GenericSorter {
 
-    public static final int CHUNK_SIZE = 10000;
+    public static final int CHUNK_SIZE;
     public static final String TMP_DIRECTORY = "tmp\\";
     public static final String CHUNK_GENERAL_NAME = "sorted_chunk_";
+
+    static{
+        //Calculate a reasonable chunk size based on the available memory
+        Runtime runtime = Runtime.getRuntime();
+        long memory = runtime.totalMemory();
+        CHUNK_SIZE = (int) memory/(2*4);
+    }
 
     /**
      * This method reads from source, sorts, and then writes to destination
@@ -24,7 +31,10 @@ public class GenericSorter {
      * @param source
      * @param destination
      */
-    public static void sort(Reader source, Writer destination){
+    public static void sort (Reader source, Writer destination) throws IOException{
+
+        Path dirPathObj = Paths.get(TMP_DIRECTORY);
+        Files.createDirectories(dirPathObj);
 
         List<ChunkEntry> chunkList = createSortedChunks(source);
         unifyChunks(destination, chunkList);
@@ -32,33 +42,35 @@ public class GenericSorter {
     }
 
     /**
-     * This methods receives a Reader, consumes it in chunks,
+     * This methods receives a {@link Reader}, consumes chunks of {@code int} from it,
      * writes each chunk to a separate file, and stores the info about each chunk.
      *
-     * @param source The Reader pointing to the source we want to read and sort
+     * @param source The {@link Reader} pointing to the source we want to read and sort
      */
     private static List<ChunkEntry> createSortedChunks(Reader source){
-        int[] chunk;
+
         int chunkNumber = 0;
-        boolean eofFound = false;
+        boolean consumed = false;
         List<ChunkEntry> chunkList = new ArrayList<>();
+        List<Integer> chunk;
         String chunkPath;
+
 
         try (BufferedReader reader = new BufferedReader(source)) {
 
-            while(!eofFound) {
+            while(!consumed) {
                 //Read file and sort chunk
-                chunk = new int[CHUNK_SIZE];
+                chunk = new ArrayList<>();
                 for (int i = 0; i < CHUNK_SIZE; i++) {
                     String val = reader.readLine();
                     if (val == null) {
-                        eofFound = true;
+                        consumed = true;
                         break;
                     } else {
-                        chunk[i] = Integer.parseInt(val);
+                        chunk.add(Integer.parseInt(val));
                     }
                 }
-                Arrays.sort(chunk);
+                Collections.sort(chunk);
 
                 //Create new Chunk File and write sorted values to a tmp_file
                 chunkNumber++;
@@ -93,15 +105,14 @@ public class GenericSorter {
                     entry.close();
                     chunkList.remove(entry);
                 }
-
             }
 
         } catch (IOException e){
-            System.out.println("There was an error reading the file. Exiting.");
+            System.out.println("There was an error reading the file.");
         }
     }
 
-    private static ChunkEntry storeChunk(int[] values, String path){
+    private static ChunkEntry storeChunk(List<Integer> values, String path){
         //Write the values to disk
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
 

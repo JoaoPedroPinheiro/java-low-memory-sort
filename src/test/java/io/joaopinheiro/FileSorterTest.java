@@ -46,8 +46,7 @@ public class FileSorterTest {
 
     @Test
     public void createFile(){
-        FileSorter.createSortedChunks(FILE_PATH);
-        FileSorter.unifyChunks("sorted_"+FILE_PATH);
+
     }
 
 
