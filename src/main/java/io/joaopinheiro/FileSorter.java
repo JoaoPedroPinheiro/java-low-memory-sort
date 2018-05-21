@@ -20,8 +20,7 @@ public class FileSorter {
             Reader source = new FileReader(filePath);
             Writer destination = new FileWriter("sorted_"+filePath);
 
-            GenericSorter sorter = new GenericSorter();
-            sorter.sort(source, destination);
+            GenericSorter.sort(source, destination);
 
         } catch (FileNotFoundException e){
             System.out.println("The File was not found: " + e.getLocalizedMessage());
@@ -30,8 +29,6 @@ public class FileSorter {
             System.out.println("There was an error: " + e.getLocalizedMessage());
             System.exit(1);
         }
-
-
         System.out.println("Your file is sorted");
     }
 

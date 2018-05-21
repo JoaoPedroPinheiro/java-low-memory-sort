@@ -30,6 +30,7 @@ public class ChunkEntry implements Comparable<ChunkEntry> {
     public ChunkEntry(Reader chunkSource){
         bufferedReader = new BufferedReader(chunkSource);
         this.hasNext();
+
     }
 
     public int getNextInt(){

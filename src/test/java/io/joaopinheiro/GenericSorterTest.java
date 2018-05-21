@@ -19,8 +19,8 @@ class GenericSorterTest {
     @Test
     public void sortTest() throws Exception {
 
-        //Set CHUNK_SIZE to a smaller value
-        Field chunk_size = GenericSorter.class.getField("CHUNK_SIZE");
+        //Set CHUNK_LENGTH to a smaller value
+        Field chunk_size = GenericSorter.class.getField("CHUNK_LENGTH");
         chunk_size.setAccessible(true);
 
         Field modifiers = Field.class.getDeclaredField("modifiers");

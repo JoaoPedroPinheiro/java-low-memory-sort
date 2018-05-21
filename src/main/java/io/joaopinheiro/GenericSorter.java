@@ -17,17 +17,16 @@ import java.util.*;
 
 public class GenericSorter {
 
-    public static final int CHUNK_SIZE ;
+    public static final int CHUNK_LENGTH;
     public static final String TMP_DIRECTORY = "tmp\\";
     public static final String CHUNK_GENERAL_NAME = "sorted_chunk_";
-
     /*
      * (Rudimentary) Heuristic to guess acceptable Chunk Size
      */
     static{
         Runtime runtime = Runtime.getRuntime();
         long memory = runtime.totalMemory();
-        CHUNK_SIZE = (int) memory/(10*4);
+        CHUNK_LENGTH = (int) memory/(4*10);
     }
 
     /**
@@ -67,7 +66,7 @@ public class GenericSorter {
                 //Read file and sort chunk
                 chunk = new ArrayList<>();
                 StringBuilder string = new StringBuilder();
-                for (int i = 0; i < CHUNK_SIZE; i++) {
+                for (int i = 0; i < CHUNK_LENGTH; i++) {
                     string.append(reader.readLine());
                     if (string.toString().equals("null")) {
                         consumed = true;
