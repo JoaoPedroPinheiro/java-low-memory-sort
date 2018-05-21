@@ -15,7 +15,7 @@ import java.util.*;
  * @author Joao Pedro Pinheiro
  */
 
-public class GenericSorter {
+public class IntegerInputSorter {
 
     public static final int CHUNK_LENGTH;
     public static final String TMP_DIRECTORY = "tmp\\";
@@ -109,7 +109,7 @@ public class GenericSorter {
                 writer.write(Integer.toString(entry.getNextInt()));
                 writer.newLine();
 
-                if(!entry.hasNext()){
+                if(!entry.readNextIfAvailable()){
                     //returning false means there is no next value
                     entry.close();
                     chunkList.remove(entry);

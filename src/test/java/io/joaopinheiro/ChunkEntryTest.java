@@ -26,10 +26,10 @@ class ChunkEntryTest {
 
         for(Integer val: values){
             assertEquals(val.intValue(), entry.getNextInt());
-            entry.hasNext();
+            entry.readNextIfAvailable();
         }
 
-        assertFalse(entry.hasNext());
+        assertFalse(entry.readNextIfAvailable());
 
     }
 

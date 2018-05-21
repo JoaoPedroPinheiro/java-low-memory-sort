@@ -10,15 +10,16 @@ import java.io.*;
  *
  * <p></p>
  *
- * Call {@link ChunkEntry#hasNext()} and {@link ChunkEntry#getNextInt()} to get all the values in the chunk.
+ * Call {@link ChunkEntry#readNextIfAvailable()} and {@link ChunkEntry#getNextInt()} to get all the values in the chunk.
  *
- * After {@link ChunkEntry#hasNext()} returns {@code false}, call {@link #close()} to close the Resource
+ * After {@link ChunkEntry#readNextIfAvailable()} returns {@code false}, call {@link #close()} to close the Resource
  *
  * @author Joao Pedro Pinheiro
  */
 public class ChunkEntry implements Comparable<ChunkEntry> {
 
     private int nextInt;
+    private boolean currentRead;
     private BufferedReader bufferedReader;
 
     /**
@@ -29,11 +30,13 @@ public class ChunkEntry implements Comparable<ChunkEntry> {
      */
     public ChunkEntry(Reader chunkSource){
         bufferedReader = new BufferedReader(chunkSource);
-        this.hasNext();
+        currentRead = false;
+        this.readNextIfAvailable();
 
     }
 
     public int getNextInt(){
+        currentRead = true;
         return nextInt;
     }
 
@@ -42,7 +45,7 @@ public class ChunkEntry implements Comparable<ChunkEntry> {
      *
      * @return {@code true} if there is a next value, or {@code false} if end of the stream is reached.
      */
-    public boolean hasNext(){
+    public boolean readNextIfAvailable(){
         try {
             nextInt = Integer.parseInt(bufferedReader.readLine());
         } catch (IOException e) {

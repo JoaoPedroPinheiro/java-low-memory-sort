@@ -14,13 +14,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GenericSorterTest {
+class IntegerInputSorterTest {
 
     @Test
     public void sortTest() throws Exception {
 
         //Set CHUNK_LENGTH to a smaller value
-        Field chunk_size = GenericSorter.class.getField("CHUNK_LENGTH");
+        Field chunk_size = IntegerInputSorter.class.getField("CHUNK_LENGTH");
         chunk_size.setAccessible(true);
 
         Field modifiers = Field.class.getDeclaredField("modifiers");
@@ -40,7 +40,7 @@ class GenericSorterTest {
         }
 
         StringWriter writer = new StringWriter();
-        GenericSorter.sort(new StringReader(string.toString()), writer);
+        IntegerInputSorter.sort(new StringReader(string.toString()), writer);
         BufferedReader resultReader = new BufferedReader(new StringReader(writer.toString()));
 
         Collections.sort(values);

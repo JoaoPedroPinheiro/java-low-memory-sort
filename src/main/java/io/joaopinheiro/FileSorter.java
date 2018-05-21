@@ -9,18 +9,22 @@ import java.io.*;
  */
 public class FileSorter {
 
-
     public static void main(String[] args){
-        String filePath = args[0];
-        if(filePath == null) {
+        String sourceFilePath = args[0];
+        String destinationFilePath = args[1];
+
+        if(sourceFilePath == null) {
             throw new IllegalArgumentException("Please provide the target file as an argument.");
+        }
+        if(destinationFilePath == null) {
+            throw new IllegalArgumentException("Please provide the destination file as an argument.");
         }
 
         try{
-            Reader source = new FileReader(filePath);
-            Writer destination = new FileWriter("sorted_"+filePath);
+            Reader source = new FileReader(sourceFilePath);
+            Writer destination = new FileWriter(destinationFilePath);
 
-            GenericSorter.sort(source, destination);
+            IntegerInputSorter.sort(source, destination);
 
         } catch (FileNotFoundException e){
             System.out.println("The File was not found: " + e.getLocalizedMessage());
