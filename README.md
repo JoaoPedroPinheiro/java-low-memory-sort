@@ -4,7 +4,7 @@ Utility to sort large files containing integers separated by newline in a memory
 
 The central class is the **IntegerInputSorter**, and the most important method is IntegerInputSorter.**sort(Reader input, Writer output)** that receives a Reader pointing to the input to be sorted, and a Writer pointing to the output. 
 
-##Implementation details
+## Implementation details
 
 1. The file is read in chunks. Each chunk is sorted and stored in a disk, and a reference to it is kept in memory, in the form of a **ChunkEntry**.
 2. After the whole file has been consumed in this way, the chunks are consumed by reading one integer from each and then:
@@ -15,6 +15,6 @@ The central class is the **IntegerInputSorter**, and the most important method i
 
 
 
-###ChunkEntry
+### ChunkEntry
 
 ​	The ChunkEntry class works as a wrapper for a BufferedReader pointing to a chunk. The goal was to create functionality similar to a Stack of integers where the user can consume one value at a time up until it is empty. 
