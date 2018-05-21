@@ -1,57 +1,51 @@
 package io.joaopinheiro;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.StringReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.StringWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static io.joaopinheiro.GenericSorter.CHUNK_GENERAL_NAME;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GenericSorterTest {
 
-    @BeforeAll
-    public static void init() throws IOException{
-        Path filePath = Paths.get(GenericSorter.TMP_DIRECTORY);
-        Files.createDirectories(filePath);
-        assertTrue(Files.exists(filePath));
-    }
-
-    @AfterAll
-    public static void cleanup(){
-        Path filePath = Paths.get(GenericSorter.TMP_DIRECTORY);
-        assertTrue(Files.exists(filePath));
-
-        GenericSorter.cleanup();
-        assertFalse(Files.exists(filePath));
-    }
-
     @Test
-    public void storeChunkTest(){
+    public void sortTest() throws Exception {
+
+        //Set CHUNK_SIZE to a smaller value
+        Field chunk_size = GenericSorter.class.getField("CHUNK_SIZE");
+        chunk_size.setAccessible(true);
+
+        Field modifiers = Field.class.getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        modifiers.setInt(chunk_size, chunk_size.getModifiers() & ~Modifier.FINAL);
+
+        chunk_size.set(null, 50);
+
         List<Integer> values = new ArrayList<>();
         StringBuilder string = new StringBuilder();
-        for(int i =1; i < 101; i++){
-            values.add(i);
-            string.append(i);
+
+        for (int i = 0; i < 5000; i++) {
+            int current = ThreadLocalRandom.current().nextInt(-1000, 1000);
+            values.add(current);
+            string.append(current);
             string.append(System.lineSeparator());
         }
 
-        ChunkEntry entry = new ChunkEntry(new StringReader(string.toString()));
-        ChunkEntry storedChunk = GenericSorter.storeChunk(values, GenericSorter.TMP_DIRECTORY+CHUNK_GENERAL_NAME+1);
+        StringWriter writer = new StringWriter();
+        GenericSorter.sort(new StringReader(string.toString()), writer);
+        BufferedReader resultReader = new BufferedReader(new StringReader(writer.toString()));
 
-        do{
-            assertEquals(entry.getNextInt(), storedChunk.getNextInt());
-        } while (entry.hasNext() && storedChunk.hasNext());
-
-        entry.close();
-        storedChunk.close();
+        Collections.sort(values);
+        for (int val : values) {
+            assertEquals(val, Integer.parseInt(resultReader.readLine()));
+        }
     }
-
 }
