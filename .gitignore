@@ -27,3 +27,5 @@ hs_err_pid*
 
 *.txt
 tmp
+*big_file
+sorted*

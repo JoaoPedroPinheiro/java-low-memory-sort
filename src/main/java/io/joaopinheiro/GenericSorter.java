@@ -7,14 +7,17 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
- * Utility class with method to sort an input and write it to the output
+ * Utility class with method to sort an input containing {@code int} separated by newlines
+ * and write it to the given output
+ *
+ * Uses temporary files written to disk to avoid running out of memory
  *
  * @author Joao Pedro Pinheiro
  */
 
 public class GenericSorter {
 
-    public static final int CHUNK_SIZE;
+    public static final int CHUNK_SIZE ;
     public static final String TMP_DIRECTORY = "tmp\\";
     public static final String CHUNK_GENERAL_NAME = "sorted_chunk_";
 
@@ -24,7 +27,7 @@ public class GenericSorter {
     static{
         Runtime runtime = Runtime.getRuntime();
         long memory = runtime.totalMemory();
-        CHUNK_SIZE = (int) memory/(2*4);
+        CHUNK_SIZE = (int) memory/(10*4);
     }
 
     /**
@@ -63,14 +66,16 @@ public class GenericSorter {
             while(!consumed) {
                 //Read file and sort chunk
                 chunk = new ArrayList<>();
+                StringBuilder string = new StringBuilder();
                 for (int i = 0; i < CHUNK_SIZE; i++) {
-                    String val = reader.readLine();
-                    if (val == null) {
+                    string.append(reader.readLine());
+                    if (string.toString().equals("null")) {
                         consumed = true;
                         break;
                     } else {
-                        chunk.add(Integer.parseInt(val));
+                        chunk.add(Integer.parseInt(string.toString()));
                     }
+                    string.setLength(0);
                 }
                 if(chunk.isEmpty()){
                     break;
