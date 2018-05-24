@@ -24,7 +24,7 @@ public class FileSorter {
             Reader source = new FileReader(sourceFilePath);
             Writer destination = new FileWriter(destinationFilePath);
 
-            IntegerInputSorter.sort(source, destination);
+            new IntegerInputSorter(source, destination).sort();
 
         } catch (FileNotFoundException e){
             System.out.println("The File was not found: " + e.getLocalizedMessage());

@@ -17,31 +17,67 @@ import java.util.*;
 
 public class IntegerInputSorter {
 
-    public static final int CHUNK_LENGTH;
+    public static final int MAX_CHUNK_LENGTH;
+    public static final int MAX_NUMBER_OF_CHUNKS;
     public static final String TMP_DIRECTORY = "tmp\\";
     public static final String CHUNK_GENERAL_NAME = "sorted_chunk_";
+    public static final String INTERMEDIATE_CHUNK_NAME = "intermediate_chunk";
+
+    private Reader source;
+    private Writer destination;
+
+
+    private List<ChunkEntry> chunkList;
+
     /*
-     * (Rudimentary) Heuristic to guess acceptable Chunk Size
+     * (Rudimentary) Heuristic to guess acceptable Chunk Size and Maximum number of Chunks
      */
     static{
         Runtime runtime = Runtime.getRuntime();
         long memory = runtime.totalMemory();
-        CHUNK_LENGTH = (int) memory/(4*10);
+        MAX_CHUNK_LENGTH = (int) memory/(4*10);
+        MAX_NUMBER_OF_CHUNKS = (int) memory/ChunkEntry.CHUNK_ENTRY_SIZE*10;
+    }
+
+    public IntegerInputSorter(Reader source, Writer destination){
+        this.source = source;
+        this.destination = destination;
+        chunkList = new ArrayList<>();
     }
 
     /**
      * This method reads from source, sorts, and then writes to destination
-     *
-     * @param source
-     * @param destination
      */
-    public static void sort (Reader source, Writer destination) throws IOException{
+    public void sort() throws IOException{
 
         Path dirPathObj = Paths.get(TMP_DIRECTORY);
         Files.createDirectories(dirPathObj);
 
-        List<ChunkEntry> chunkList = createSortedChunks(source);
-        unifyChunks(destination, chunkList);
+        boolean complete = false;
+        int count = 0;
+
+        try (BufferedReader reader = new BufferedReader(source)) {
+
+        while(!complete){
+           complete = createSortedChunks(reader);
+           if(complete) {
+               unifyChunks(destination);
+           } else {
+               /*
+                If the file has not been completely consumed, unify the existing
+                chunks into a larger chunk, keep a reference, and continue
+                */
+
+               unifyChunks(new FileWriter(TMP_DIRECTORY + INTERMEDIATE_CHUNK_NAME + count));
+
+               ChunkEntry intermediateUnified = new ChunkEntry(new FileReader(TMP_DIRECTORY + INTERMEDIATE_CHUNK_NAME + count));
+               chunkList.add(intermediateUnified);
+               count++;
+           }
+        }
+        } catch (IOException | NumberFormatException e){
+            System.out.println("There was an error reading the file: " + e.getLocalizedMessage());
+        }
         cleanup();
     }
 
@@ -50,24 +86,23 @@ public class IntegerInputSorter {
      * writes each chunk to a separate file, and stores the info about each chunk.
      *
      * @param source The {@link Reader} pointing to the source we want to read and sort
+     * @return {@code true} if the input has been completely consumed, false otherwise
      */
-   private static List<ChunkEntry> createSortedChunks(Reader source){
+   private boolean createSortedChunks(BufferedReader source){
 
         int chunkNumber = 0;
         boolean consumed = false;
-        List<ChunkEntry> chunkList = new ArrayList<>();
         List<Integer> chunk;
         String chunkPath;
 
-
-        try (BufferedReader reader = new BufferedReader(source)) {
-
-            while(!consumed) {
+        try {
+            while (!consumed) {
                 //Read file and sort chunk
                 chunk = new ArrayList<>();
                 StringBuilder string = new StringBuilder();
-                for (int i = 0; i < CHUNK_LENGTH; i++) {
-                    string.append(reader.readLine());
+
+                for (int i = 0; i < MAX_CHUNK_LENGTH; i++) {
+                    string.append(source.readLine());
                     if (string.toString().equals("null")) {
                         consumed = true;
                         break;
@@ -76,7 +111,8 @@ public class IntegerInputSorter {
                     }
                     string.setLength(0);
                 }
-                if(chunk.isEmpty()){
+
+                if (chunk.isEmpty()) {
                     break;
                 }
                 Collections.sort(chunk);
@@ -85,16 +121,20 @@ public class IntegerInputSorter {
                 chunkNumber++;
                 chunkPath = TMP_DIRECTORY + CHUNK_GENERAL_NAME + chunkNumber;
                 chunkList.add(storeChunk(chunk, chunkPath));
-            }
-            return chunkList;
 
-        } catch (IOException | NumberFormatException e){
+                if (chunkList.size() == MAX_NUMBER_OF_CHUNKS) {
+                    return false;
+                }
+            }
+        } catch (IOException e){
             System.out.println("There was an error reading the file: " + e.getLocalizedMessage());
-            return null;
         }
+        return true;
+
+
     }
 
-   private static void unifyChunks(Writer destination,List<ChunkEntry> chunkList){
+   private void unifyChunks(Writer destination){
 
         try(BufferedWriter writer = new BufferedWriter(destination)){
 
@@ -106,6 +146,7 @@ public class IntegerInputSorter {
                 ChunkEntry entry = chunkList.get(0);
 
                 //write to new file
+//                writer.append(Integer.toString(entry.getNextInt()));
                 writer.write(Integer.toString(entry.getNextInt()));
                 writer.newLine();
 
@@ -121,7 +162,7 @@ public class IntegerInputSorter {
         }
     }
 
-    private static ChunkEntry storeChunk(List<Integer> values, String path){
+    private ChunkEntry storeChunk(List<Integer> values, String path){
         //Write the values to disk
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(path))){
 

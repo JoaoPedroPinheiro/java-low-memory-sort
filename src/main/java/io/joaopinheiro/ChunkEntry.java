@@ -1,5 +1,7 @@
 package io.joaopinheiro;
 
+import jdk.nashorn.internal.ir.debug.ObjectSizeCalculator;
+
 import java.io.*;
 
 /**
@@ -18,9 +20,13 @@ import java.io.*;
  */
 public class ChunkEntry implements Comparable<ChunkEntry> {
 
+    /** Memory use dby each ChunkEntry. Calculated using {@link ObjectSizeCalculator}*/
+    public static final int CHUNK_ENTRY_SIZE = 25360;
+
     private int nextInt;
-    private boolean currentRead;
     private BufferedReader bufferedReader;
+
+
 
     /**
      * Constructs a new ChunkEntry. Uses the {@link Reader} to build a {@link BufferedReader}
@@ -30,13 +36,10 @@ public class ChunkEntry implements Comparable<ChunkEntry> {
      */
     public ChunkEntry(Reader chunkSource){
         bufferedReader = new BufferedReader(chunkSource);
-        currentRead = false;
         this.readNextIfAvailable();
-
     }
 
     public int getNextInt(){
-        currentRead = true;
         return nextInt;
     }
 

@@ -19,8 +19,8 @@ class IntegerInputSorterTest {
     @Test
     public void sortTest() throws Exception {
 
-        //Set CHUNK_LENGTH to a smaller value
-        Field chunk_size = IntegerInputSorter.class.getField("CHUNK_LENGTH");
+        //Set MAX_CHUNK_LENGTH to a smaller value
+        Field chunk_size = IntegerInputSorter.class.getField("MAX_CHUNK_LENGTH");
         chunk_size.setAccessible(true);
 
         Field modifiers = Field.class.getDeclaredField("modifiers");
@@ -40,7 +40,7 @@ class IntegerInputSorterTest {
         }
 
         StringWriter writer = new StringWriter();
-        IntegerInputSorter.sort(new StringReader(string.toString()), writer);
+        new IntegerInputSorter(new StringReader(string.toString()), writer).sort();
         BufferedReader resultReader = new BufferedReader(new StringReader(writer.toString()));
 
         Collections.sort(values);
