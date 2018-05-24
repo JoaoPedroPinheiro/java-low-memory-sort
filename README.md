@@ -2,7 +2,7 @@
 
 Utility to sort large files containing integers separated by newline in a memory restricted environment.
 
-The central class is the **IntegerInputSorter**, and the most important method is IntegerInputSorter.**sort(Reader input, Writer output)** that receives a Reader pointing to the input to be sorted, and a Writer pointing to the output. 
+The central class is the **IntegerInputSorter**. The constructor receives a Reader pointing to the input and a Writer pointing to the desired output location.
 
 ## Implementation details
 
@@ -12,8 +12,7 @@ The central class is the **IntegerInputSorter**, and the most important method i
    2. Write it to the output, and update that chunk by reading the next value. 
    3. If the chunk has been completely consumed, remove it from memory, and delete the file.
    4. Repeat until all chunks have been consumed. 
-
-
+3. There is a maximum chunk length, and a maximum number of chunks handled at once. If necessary, intermediate unifications steps are taken. This is done to avoid running out of memory with a file large enough to require more chunks than the number of ChunkEntry objects that fit into memory. 
 
 ### ChunkEntry
 
